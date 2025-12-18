@@ -1,0 +1,28 @@
+services:
+  container-inspector-api:
+    image: ghcr.io/devianteng/container-inspector-api:latest
+    container_name: container-inspector-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount SSH keys for accessing other hosts
+      - /root/.ssh:/root/.ssh:ro
+      # Mount docker socket for local container access (optional)
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - TZ=America/Kentucky/Louisville
+    networks:
+      - monitor
+    labels:
+      - "com.docker.compose.project=monitor"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  monitor:
+    external: true
