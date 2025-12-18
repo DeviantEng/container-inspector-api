@@ -26,9 +26,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Configuration
-DOCKER_HOSTS = ["docker01", "docker02", "docker03"]
-COMPOSE_BASE_PATH = "/opt/docker"
+# Configuration - read from environment or default to localhost
+DOCKER_HOSTS = os.getenv("DOCKER_HOSTS", "localhost").split(",")
+DOCKER_HOSTS = [host.strip() for host in DOCKER_HOSTS]  # Remove any whitespace
 
 
 class ContainerInfo(BaseModel):

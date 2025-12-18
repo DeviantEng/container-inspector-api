@@ -98,10 +98,18 @@ Returns real-time container resource usage statistics (single snapshot).
 
 ## Configuration
 
-Edit `app.py` to configure Docker hosts:
+The API reads Docker hosts from the `DOCKER_HOSTS` environment variable:
 
-```python
-DOCKER_HOSTS = ["docker01", "docker02", "docker03"]
+```bash
+DOCKER_HOSTS=docker01,docker02,docker03
+```
+
+**Default:** If not specified, defaults to `localhost` (local Docker only).
+
+Edit `docker-compose.yml` or pass via command line:
+
+```bash
+docker run -e DOCKER_HOSTS=docker01,docker02,docker03 ...
 ```
 
 ## Security Considerations

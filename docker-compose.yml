@@ -12,6 +12,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - TZ=America/Kentucky/Louisville
+      - DOCKER_HOSTS=docker01,docker02,docker03
     networks:
       - monitor
     labels:
