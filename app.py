@@ -29,6 +29,10 @@ app.add_middleware(
 # Configuration - read from environment or default to localhost
 DOCKER_HOSTS = os.getenv("DOCKER_HOSTS", "localhost").split(",")
 DOCKER_HOSTS = [host.strip() for host in DOCKER_HOSTS]  # Remove any whitespace
+LOCAL_HOST = os.getenv("LOCAL_HOST", "false").strip().lower()
+
+# Determine if we have a local host that can use docker socket
+USE_LOCAL_SOCKET = LOCAL_HOST != "false" and os.path.exists("/var/run/docker.sock")
 
 
 class ContainerInfo(BaseModel):
@@ -44,13 +48,25 @@ class ContainerList(BaseModel):
 
 
 def run_ssh_command(host: str, command: str) -> tuple[str, str, int]:
-    """Execute command via SSH on remote host"""
-    if host == os.uname().nodename:
-        # Local host - run directly
-        cmd = ["bash", "-c", command]
-    else:
-        # Remote host - use SSH
-        cmd = ["ssh", "-o", "StrictHostKeyChecking=no", f"root@{host}", command]
+    """Execute command via SSH on remote host, or locally via docker socket if it's the local host"""
+    
+    # Check if this is the local host and we should use docker socket
+    if USE_LOCAL_SOCKET and host == LOCAL_HOST and command.startswith("docker "):
+        try:
+            result = subprocess.run(
+                ["bash", "-c", command],
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+            return result.stdout, result.stderr, result.returncode
+        except subprocess.TimeoutExpired:
+            return "", "Command timed out", 1
+        except Exception as e:
+            return "", str(e), 1
+    
+    # Use SSH for remote hosts or if local socket is not available
+    cmd = ["ssh", "-o", "StrictHostKeyChecking=no", "-o", "ConnectTimeout=5", f"root@{host}", command]
     
     try:
         result = subprocess.run(

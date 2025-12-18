@@ -13,8 +13,7 @@ services:
     environment:
       - TZ=America/Kentucky/Louisville
       - DOCKER_HOSTS=docker01,docker02,docker03
-    networks:
-      - monitor
+      - LOCAL_HOST=docker01
     labels:
       - "com.docker.compose.project=monitor"
     healthcheck:
@@ -23,7 +22,3 @@ services:
       timeout: 10s
       retries: 3
       start_period: 10s
-
-networks:
-  monitor:
-    external: true

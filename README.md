@@ -98,18 +98,42 @@ Returns real-time container resource usage statistics (single snapshot).
 
 ## Configuration
 
-The API reads Docker hosts from the `DOCKER_HOSTS` environment variable:
+The API reads Docker hosts from environment variables:
 
+**DOCKER_HOSTS** - Comma-separated list of Docker hosts to query:
 ```bash
 DOCKER_HOSTS=docker01,docker02,docker03
 ```
+**Default:** `localhost` (local Docker only)
 
-**Default:** If not specified, defaults to `localhost` (local Docker only).
+**LOCAL_HOST** - Which host in DOCKER_HOSTS is the local host (uses Docker socket instead of SSH):
+```bash
+LOCAL_HOST=docker01
+```
+**Default:** `false` (all hosts use SSH)
+
+Set `LOCAL_HOST=false` if the API is not running on any of the Docker hosts (e.g., separate monitoring server).
 
 Edit `docker-compose.yml` or pass via command line:
 
 ```bash
-docker run -e DOCKER_HOSTS=docker01,docker02,docker03 ...
+docker run -e DOCKER_HOSTS=docker01,docker02,docker03 -e LOCAL_HOST=docker01 ...
+```
+
+**Example configurations:**
+
+Running on docker01:
+```yaml
+environment:
+  - DOCKER_HOSTS=docker01,docker02,docker03
+  - LOCAL_HOST=docker01
+```
+
+Running on a separate monitoring server:
+```yaml
+environment:
+  - DOCKER_HOSTS=docker01,docker02,docker03
+  - LOCAL_HOST=false
 ```
 
 ## Security Considerations
